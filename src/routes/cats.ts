@@ -46,6 +46,12 @@ router.get("/:id", async (req, res) => {
   res.json(rows[0]);
 });
 
+//COUNT 
+router.get("/count/all", async (req, res) => {
+  const facts = await db.select().from(catFacts);
+  res.json({ count: facts.length });
+});
+
 // UPDATE
 router.put("/:id", async (req, res) => {
   const id = Number(req.params.id);
@@ -62,3 +68,10 @@ router.delete("/:id", async (req, res) => {
   await db.delete(catFacts).where(eq(catFacts.id, id));
   res.json({ message: "deleted" });
 });
+
+// DELETE all
+router.delete("/", async (req, res) => {
+  await db.delete(catFacts);
+  res.json({ message: "all facts deleted" });
+});
+
