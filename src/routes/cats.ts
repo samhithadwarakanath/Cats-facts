@@ -41,10 +41,26 @@ router.get("/", async (_req, res) => {
 // READ one
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
-  const rows = await db.select().from(catFacts).where(eq(catFacts.id, id));
-  if (rows.length === 0) return res.status(404).json({ error: "not found" });
-  res.json(rows[0]);
+  // invalid id check
+
+  if (isNaN(id)) {
+    return res.status(400).json({ error: "Invalid ID" });
+  }
+
+  const result = await db
+    .select()
+    .from(catFacts)
+    .where(eq(catFacts.id, id))
+    .limit(1);
+    // not found check
+
+  if (result.length === 0) {
+    return res.status(404).json({ error: "Not found" });
+  }
+
+  res.json(result[0]);
 });
+
 
 //COUNT 
 router.get("/count/all", async (req, res) => {
