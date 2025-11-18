@@ -26,11 +26,29 @@ const BodySchema = z.object({
 
 // CREATE manually
 router.post("/", async (req, res) => {
-  const parsed = BodySchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-  await db.insert(catFacts).values(parsed.data);
-  res.json({ message: "created" });
+  try {
+    const fact = req.body.fact;
+
+    // Basic validation
+    if (!fact || fact.length < 5) {
+      return res.status(400).json({ error: "Fact too short or missing" });
+    }
+
+    // Insert into DB and compute length automatically
+    await db.insert(catFacts).values({
+      fact,
+      length: fact.length
+    });
+
+    // ✅ Return all facts after inserting the new one
+    const rows = await db.select().from(catFacts);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error inserting cat fact" });
+  }
 });
+
 
 // READ all
 router.get("/", async (_req, res) => {
